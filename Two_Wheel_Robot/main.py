@@ -18,7 +18,6 @@ j_0 = 5
 theta_0 = 0
 gyro_noise_density = 0.005
 magneto_noise_density = 0.02
-trials = 100
 
 
 # HELPER FUNCTIONS
@@ -137,7 +136,7 @@ def simulatePath():
     correctPath_i = []
     correctPath_j = []
     correctPath_theta = []
-
+    trials = 100
     noisyPath_i = []
     noisyPath_j = []
     noisyPath_theta = []
@@ -160,19 +159,22 @@ def simulatePath():
     u_vector_noisy = [math.cos(noisyPath_theta[i]) for i in range(trials)]
     v_vector_noisy = [math.sin(noisyPath_theta[i]) for i in range(trials)]
 
-    plt.quiver(correctPath_i, correctPath_j, u_vector, v_vector, width=0.02, scale=1, units="xy")
-    plt.plot(correctPath_i, correctPath_j)
-
-    plt.quiver(noisyPath_i, noisyPath_j, u_vector, v_vector, width=0.01, scale=4, units="xy", color="r")
-    plt.plot(noisyPath_i, noisyPath_j, "r--", linewidth=0.2)
+    plt.quiver(correctPath_i,correctPath_j,u_vector,v_vector,width=0.02,scale=1, units="xy",color = "b")
+    #plt.plot(correctPath_i,correctPath_j,linewidth=0.4)
+  
+    plt.quiver(noisyPath_i,noisyPath_j,u_vector,v_vector,width=0.01,scale=4, units="xy", color = "r")
+    plt.plot(noisyPath_i,noisyPath_j, "r--",linewidth=0.2)
 
     plt.xlim(0, L)
     plt.ylim(0, H)
     plt.xlabel("X Direction")
     plt.ylabel("Y Direction")
     plt.title("Trajectory of Robot over " + str(trials) + " Simulations")
-    plt.legend(['Path of Robot', 'Noisy Path', 'Forward Robot Direction'])
+    plt.legend(['Noisy Path', 'Ideal Path'])
     plt.show()
+
+
+
 
 
 # Helper function to truncate values in plot
@@ -182,7 +184,7 @@ def truncate(n, decimals=0):
 
 def simulateOutputs():
     x = [random.random() * L, random.random() * H, random.random() * 2 * pi]
-    # output = []
+    trials = 1000
     l_f_values = []
     l_r_values = []
     omega_values = []
@@ -200,7 +202,7 @@ def simulateOutputs():
     # PLOTTING
     n_bins = 50
     fig, (plots) = plt.subplots(3, 2)
-    plots[0, 0].quiver(x[0], x[1], math.cos(x[2]), math.sin(x[2]))  # testing point
+    plots[0, 0].quiver(x[0], x[1], math.cos(x[2]), math.sin(x[2]),width=0.2,scale=0.5, units="xy",color = "b")  # testing point
     plots[0, 0].legend(['Testing Point'])
     for i in range(len(x)):
         x[i] = truncate(x[i], 2)
@@ -233,10 +235,20 @@ def simulateOutputs():
     plots[2, 1].set_xlabel("Simulated Output Value of b_2")
     plots[2, 1].set_ylabel("Occurrences")
     plots[2, 1].set_title("Output Values of b_2 for " + str(trials) + " simulations")
+    plt.tight_layout()
     plt.show()
 
-    return 0
-
-
+  
+  
 simulatePath()
 simulateOutputs()
+
+
+
+
+
+
+
+
+
+
