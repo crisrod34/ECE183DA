@@ -4,7 +4,7 @@ This course was designed by Professor Ankur Mehta, all formal lab exercises and 
 
 This repo contains our code and data for running paperbot and segway simulations. 
 
-Simulation Instructions: 
+## Simulation Instructions: 
 
 In order to run the paperbot simulation:
   - Run the file named xXXXXX
