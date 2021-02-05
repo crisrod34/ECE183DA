@@ -1,14 +1,14 @@
 import math
 from numpy import random
 import matplotlib.pyplot as plt
-import pandas as pd
+
 # GLOBAL CONSTANTS
-w = 90
-d = 50
-L = 20000
-H = 20000
+w = 2
+d = 1
+L = 10
+H = 10
 phi = 0
-deltaT = 0.01
+deltaT = 0.1
 pi = math.pi
 threshold_dz = 0.1
 threshold_sat = 0.9
@@ -22,15 +22,14 @@ magneto_noise_density = 0.02
 
 # HELPER FUNCTIONS
 def omega(d2):
-    return(d2*pi/180)
-    # if (abs(d2) < threshold_dz):
-    #     return 0
-    # elif (d2 > threshold_sat):
-    #     return threshold_sat * rpm_max
-    # elif (d2 < -threshold_sat):
-    #     return -threshold_sat * rpm_max
-    # else:
-    #     return rpm_max * d2
+    if (abs(d2) < threshold_dz):
+        return 0
+    elif (d2 > threshold_sat):
+        return threshold_sat * rpm_max
+    elif (d2 < -threshold_sat):
+        return -threshold_sat * rpm_max
+    else:
+        return rpm_max * d2
 
 
 def getNoiseInput():
@@ -38,7 +37,7 @@ def getNoiseInput():
 
 
 def noiseServo():
-    return random.normal(0, 1)
+    return random.normal(0, 0.001)
 
 
 def getNoiseOutput(x, u):
@@ -63,17 +62,27 @@ def noiseMagneto():
 
 # STATE EQN
 def i_prime(x, u):
-    temp = x[0] + 0.8*(omega(u[0]) + omega(u[1])) * d / 4 * math.cos(x[2]) * deltaT
-    return temp
+    temp = x[0] + (omega(u[0]) + omega(u[1])) * d / 4 * math.cos(x[2]) * deltaT
+    if (temp > L):
+        return L
+    elif (temp < 0):
+        return 0
+    else:
+        return temp
 
 
 def j_prime(x, u):
-    temp = x[1] + 0.8*(omega(u[0]) + omega(u[1])) * d / 4 * math.sin(x[2]) * deltaT
-    return temp
+    temp = x[1] + (omega(u[0]) + omega(u[1])) * d / 4 * math.sin(x[2]) * deltaT
+    if (temp > H):
+        return H
+    elif (temp < 0):
+        return 0
+    else:
+        return temp
 
 
 def theta_prime(x, u):
-    return (x[2] + 0.4*(omega(u[0]) - omega(u[1])) * d / w * deltaT) % (2 * pi)
+    return (x[2] + (omega(u[0]) - omega(u[1])) * d / w * deltaT) % (2 * pi)
 
 
 def f(x, u, v):
@@ -119,28 +128,6 @@ def b2(x):
 def h(x, u, v):
     return [l_f(x) + v[0], l_r(x) + v[1], omega_out(u) + v[2], b1(x) + v[3], b2(x) + v[4]]
 
-#Import from excel
-def testFile(fileName):
-    data = pd.read_excel(fileName)
-    wl = data.left_wheel
-    wr = data.right_wheel
-    x_sim = data.x_coord
-    y_sim = data.y_coord
-    theta_sim = data.angle_disp
-    noisyPath_i = [x_sim[0]]
-    noisyPath_j = [y_sim[0]]
-
-    x = [x_sim[0], y_sim[0],theta_sim[0]*pi/180]
-
-    for i in range(len(wl)):
-        u = [wr[i],wl[i]]
-        x = f(x,u,getNoiseInput())
-        noisyPath_i.append(x[0])
-        noisyPath_j.append(x[1])
-    plt.plot(noisyPath_i, noisyPath_j)
-    plt.plot(x_sim,y_sim,'r--')
-    plt.show()
-
 
 # SIMULATION
 def simulatePath():
@@ -149,12 +136,12 @@ def simulatePath():
     correctPath_i = []
     correctPath_j = []
     correctPath_theta = []
-    trials = 10000
+    trials = 100
     noisyPath_i = []
     noisyPath_j = []
     noisyPath_theta = []
     for i in range(trials):
-        u = [300,100]  # [2*random.random()-1,2*random.random()-1]
+        u = [0.5, 0.1]  # [2*random.random()-1,2*random.random()-1]
         correctPath_i.append(x[0])
         correctPath_j.append(x[1])
         correctPath_theta.append(x[2])
@@ -166,7 +153,24 @@ def simulatePath():
         x = f(x, u, [0, 0])
         x_noisy = f(x_noisy, u, getNoiseInput())
 
-    plt.plot(correctPath_i,correctPath_j)
+    u_vector = [math.cos(correctPath_theta[i]) for i in range(trials)]
+    v_vector = [math.sin(correctPath_theta[i]) for i in range(trials)]
+
+    u_vector_noisy = [math.cos(noisyPath_theta[i]) for i in range(trials)]
+    v_vector_noisy = [math.sin(noisyPath_theta[i]) for i in range(trials)]
+
+    plt.quiver(correctPath_i,correctPath_j,u_vector,v_vector,width=0.02,scale=1, units="xy",color = "b")
+    #plt.plot(correctPath_i,correctPath_j,linewidth=0.4)
+  
+    plt.quiver(noisyPath_i,noisyPath_j,u_vector,v_vector,width=0.01,scale=4, units="xy", color = "r")
+    plt.plot(noisyPath_i,noisyPath_j, "r--",linewidth=0.2)
+
+    plt.xlim(0, L)
+    plt.ylim(0, H)
+    plt.xlabel("X Direction")
+    plt.ylabel("Y Direction")
+    plt.title("Trajectory of Robot over " + str(trials) + " Simulations")
+    plt.legend(['Noisy Path', 'Ideal Path'])
     plt.show()
 
 
@@ -235,10 +239,10 @@ def simulateOutputs():
     plt.show()
 
   
+  
 simulatePath()
-testFile("simulationKyle.xlsx")
-testFile("simulationMegan.xlsx")
-testFile("simulationOliver.xlsx")
+simulateOutputs()
+
 
 
 
