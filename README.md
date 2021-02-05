@@ -9,6 +9,6 @@ This repo contains our code and data for running paperbot and segway simulations
 In order to run the paperbot simulation:
   - Run the file named xXXXXX
   
-In order to run the seegway simulation:
+In order to run the segway simulation:
   - Run the file named xXXXXX
   
