@@ -18,7 +18,7 @@ j_0 = 5
 theta_0 = 0
 gyro_noise_density = 0.005
 magneto_noise_density = 0.02
-
+loss = 1
 
 # HELPER FUNCTIONS
 def omega(d2):
@@ -63,17 +63,17 @@ def noiseMagneto():
 
 # STATE EQN
 def i_prime(x, u):
-    temp = x[0] + (omega(u[0]) + omega(u[1])) * d / 4 * math.cos(x[2]) * deltaT
+    temp = x[0] + loss*(omega(u[0]) + omega(u[1])) * d / 4 * math.cos(x[2]) * deltaT
     return temp
 
 
 def j_prime(x, u):
-    temp = x[1] + (omega(u[0]) + omega(u[1])) * d / 4 * math.sin(x[2]) * deltaT
+    temp = x[1] + loss*(omega(u[0]) + omega(u[1])) * d / 4 * math.sin(x[2]) * deltaT
     return temp
 
 
 def theta_prime(x, u):
-    return (x[2] + (omega(u[0]) - omega(u[1])) * (d/2) / w * deltaT) % (2 * pi)
+    return (x[2] + loss*(omega(u[0]) - omega(u[1])) * (d/2) / w * deltaT) % (2 * pi)
 
 
 def f(x, u, v):
@@ -150,10 +150,14 @@ def testFile(fileName):
             minError = error
     plt.plot(noisyPath_i, noisyPath_j)
     plt.plot(x_sim,y_sim,'r--')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.title("Paperbot Trajectory") 
+    plt.legend(["Mathematical Simulation", "SolidWorks Simulation"])
     print(maxError)
     print(minError)
-
     plt.show()
+
 
 
 # SIMULATION
@@ -249,7 +253,7 @@ def simulateOutputs():
     plt.show()
 
   
-testFile("paperborKyle.xlsx")
+testFile("paperbotKyle.xlsx")
 testFile("paperbotMegan.xlsx")
 testFile("paperbotOliver.xlsx")
 

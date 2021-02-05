@@ -149,9 +149,12 @@ def testFile(fileName):
             minError = error
     plt.plot(noisyPath_i, noisyPath_j)
     plt.plot(x_sim,y_sim,'r--')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.title("Segway Trajectory") 
+    plt.legend(["Mathematical Simulation", "SolidWorks Simulation"])
     print(maxError)
     print(minError)
-
     plt.show()
 
 
