@@ -249,9 +249,9 @@ def simulateOutputs():
 
   
 
-testFile("kyleSegway.xlsx")
-testFile("oliverSegway.xlsx")
-testFile("meganSegway.xlsx")
+testFile("segwayKyle.xlsx")
+testFile("segwayOliver.xlsx")
+testFile("segwayMegan.xlsx")
 
 
 

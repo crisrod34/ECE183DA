@@ -249,9 +249,9 @@ def simulateOutputs():
     plt.show()
 
   
-testFile("simulationKyle.xlsx")
-testFile("simulationMegan.xlsx")
-testFile("simulationOliver.xlsx")
+testFile("paperborKyle.xlsx")
+testFile("paperbotMegan.xlsx")
+testFile("paperbotOliver.xlsx")
 
 
 
