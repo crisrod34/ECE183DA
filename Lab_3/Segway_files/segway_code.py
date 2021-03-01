@@ -1,3 +1,5 @@
+# Simulation for Segway robot that uses two wheels of diameter 502mm separated by a distance of 530mm, both directly driven by a continuous rotation servo.
+# The wheels drag a castor wheel for stability, that contacts the ground at a distance l = 682mm behind the front edge.
 import math
 from numpy import random
 import numpy as np
@@ -7,15 +9,18 @@ import xlsxwriter
 # GLOBAL CONSTANTS
 w = 530
 d = 502
+# dimensions of simulation area
 L = 20000
 H = 20000
-phi = 0
-deltaT = 0.01
 maxdist = math.sqrt(H*H + L*L)
+phi = 0
+# timesetp
+deltaT = 0.01
 pi = math.pi
 threshold_dz = 0.1
 threshold_sat = 0.9
 rpm_max = 14
+# coordinates (i,j) of robot in space
 i_0 = 5
 j_0 = 5
 theta_0 = 0
@@ -39,6 +44,7 @@ def omega(d2):
     #     return rpm_max * d2
 
 
+# NOISE from sensors
 def getNoiseInput():
     return [noiseServo(), noiseServo()]
 
@@ -67,12 +73,15 @@ def noiseMagneto():
     return random.normal(0, magneto_noise_density)
 
 
-# STATE EQN
+# STATE EQUATIONS
+# Continuous space
+
+# i is the x-position of robot
 def i_prime(x, u):
     temp = x[0] + loss*(omega(u[0]) + omega(u[1])) * d / 4 * math.cos(x[2]) * deltaT
     return temp
 
-
+# j is the y-position of robot
 def j_prime(x, u):
     temp = x[1] + loss*(omega(u[0]) + omega(u[1])) * d / 4 * math.sin(x[2]) * deltaT
     return temp
@@ -92,7 +101,8 @@ def f(x, u, v):
             theta_prime(x, [u[0] + v[0], u[1] + v[1]]),omega_out(u)]
 
 
-# OUTPUT EQN
+# OUTPUT EQNS
+# Front laser sensor reading
 def l_f(x):
     dist = 0
     f=0
@@ -109,7 +119,7 @@ def l_f(x):
         dist = abs(x[1]/math.sin(x[2]))
         f=4
     return dist
-
+# Right laser sensor reading
 def l_r(x):
     dist = 0
     if (L-x[0])*math.tan(x[2]-pi/2) + x[1] >= 0 and (L-x[0])*math.tan(x[2]-pi/2) + x[1] <= H and (x[2] >= 0  and x[2] <= pi):        #WALL ON x = L
@@ -138,7 +148,7 @@ def b2(x):
 def h(x, u, v):
     return [l_f(x) + v[0], l_r(x) + v[1], omega_out(u) + v[2], b1(x) + v[3], b2(x) + v[4]]
 
-  
+
 def getError(webot,python):
   #maxIndex = 0
   maxdiff = 0
@@ -150,6 +160,7 @@ def getError(webot,python):
     totalError = totalError + dif
   avgError = totalError/len(webot)
   return [avgError,maxdiff]
+
 #Import from excel
 def testFile(fileName, outputfile):
     data = pd.read_excel(fileName)
@@ -177,7 +188,6 @@ def testFile(fileName, outputfile):
     global deltaT 
     deltaT = time[1] - time[0]
     for i in range(len(wl)):
-        
         u = [wr[i],wl[i]]
         x = f(x,u,getNoiseInput())
         path.append(x)
@@ -460,6 +470,7 @@ def truncate(n, decimals=0):
     multiplier = 10 ** decimals
     return int(n * multiplier) / multiplier
 
+# Simluation and plotting
 def simulateOutputs():
     x = [random.random() * L, random.random() * H, random.random() * 2 * pi]
     trials = 1000
